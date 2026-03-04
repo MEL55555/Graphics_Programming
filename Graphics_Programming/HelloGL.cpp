@@ -24,7 +24,7 @@ HelloGL::HelloGL(int argc, char* argv[])
 	glutMainLoop();
 }
 
-//finsihed
+//finsihedd
 
 
 
