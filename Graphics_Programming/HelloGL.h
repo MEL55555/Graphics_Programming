@@ -11,8 +11,7 @@ public:
 	HelloGL(int argc, char* argv[]);
 	~HelloGL(void);
 
-	void Display();
+	void DrawPolygon();
 
 };
-
 

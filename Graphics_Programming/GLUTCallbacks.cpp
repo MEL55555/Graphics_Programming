@@ -14,7 +14,7 @@ namespace GLUTCallbacks
     {
         if (helloGL != nullptr)
         {
-            helloGL->Display();
+            helloGL->DrawPolygon();
         }
     }
 }
