@@ -25,8 +25,8 @@ HelloGL::HelloGL(int argc, char* argv[])
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
 	glutCreateWindow("Simple OpenGL Program");
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // white background
-	glColor3f(1.0f, 0.0f, 0.0f);          // red rectangle
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // black background
+	glColor3f(1.0f, 0.0f, 1.0f);          // red rectangle
 	glutDisplayFunc(GLUTCallbacks::Display);
 	glutMainLoop();
 }
