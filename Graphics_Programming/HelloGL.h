@@ -4,19 +4,39 @@
 #include <gl/GLU.h>
 #include <GL/freeglut.h>
 #include "GLUTCallbacks.h"
+
 #define REFRESHRATE 16
+
 class HelloGL
 {
 public:
 	HelloGL(int argc, char* argv[]);
 	~HelloGL(void);
+
 	void Display();
 	void Update();
-	void DrawRectangle();
-	void DrawSquare();
-	void DrawTriangle();
-private:
-	float rotationRect;
-	float rotationSquare;
-	float rotationTriangle;
+
+	
+	void DrawIndexedCubeAlt();
+
+	
+	void DrawPyramid();
+
+	
+	void DrawCube();
+	void DrawCubeArray();
+
+	struct Vertex
+	{
+		GLfloat x, y, z;
+	};
+
+	struct Color
+	{
+		GLfloat r, g, b;
+	};
+
+	static Vertex indexedVertices[];
+	static Color indexedColors[];
+	static GLushort indices[];
 };
