@@ -3,40 +3,23 @@
 #include <gl/GL.h>
 #include <gl/GLU.h>
 #include <GL/freeglut.h>
+
 #include "GLUTCallbacks.h"
+#include "Cube.h"
+#include "Structures.h"
 
 #define REFRESHRATE 16
+#define CUBE_COUNT 25
 
 class HelloGL
 {
 public:
-	HelloGL(int argc, char* argv[]);
-	~HelloGL(void);
+    HelloGL(int argc, char* argv[]);
+    ~HelloGL();
 
-	void Display();
-	void Update();
+    void Display();
+    void Update();
 
-	
-	void DrawIndexedCubeAlt();
-
-	
-	void DrawPyramid();
-
-	
-	void DrawCube();
-	void DrawCubeArray();
-
-	struct Vertex
-	{
-		GLfloat x, y, z;
-	};
-
-	struct Color
-	{
-		GLfloat r, g, b;
-	};
-
-	static Vertex indexedVertices[];
-	static Color indexedColors[];
-	static GLushort indices[];
+private:
+    Cube* cubes[CUBE_COUNT];
 };
