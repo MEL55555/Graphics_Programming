@@ -3,16 +3,15 @@
 #include <Windows.h>
 #include <gl/GL.h>
 
-class Cube : public SceneObject
+class StaticObject : public SceneObject
 {
 public:
-    Cube(Mesh* mesh, float x, float y, float z);
-    ~Cube();
+    StaticObject(Mesh* mesh, float x, float y, float z);
+    ~StaticObject();
 
     void Update() override;
     void Draw() override;
 
 private:
-    float _rotation;
     Vector3 _position;
 };

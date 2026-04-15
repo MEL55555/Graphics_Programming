@@ -1,27 +1,23 @@
-#include "Cube.h"
+#include "StaticObject.h"
 
-Cube::Cube(Mesh* mesh, float x, float y, float z) : SceneObject(mesh)
+StaticObject::StaticObject(Mesh* mesh, float x, float y, float z) : SceneObject(mesh)
 {
-    _rotation = 0.0f;
     _position = { x, y, z };
 }
 
-Cube::~Cube() {}
+StaticObject::~StaticObject() {}
 
-void Cube::Update()
+void StaticObject::Update()
 {
-    _rotation += 0.2f;
-    if (_rotation >= 360)
-        _rotation = 0;
+    // Deliberately empty! This object does not move or rotate.
 }
 
-void Cube::Draw()
+void StaticObject::Draw()
 {
     if (_mesh->Vertices != nullptr && _mesh->Indices != nullptr)
     {
         glPushMatrix();
         glTranslatef(_position.x, _position.y, _position.z);
-        glRotatef(_rotation, 1, 1, 0);
 
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_COLOR_ARRAY);

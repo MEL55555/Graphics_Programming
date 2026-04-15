@@ -5,11 +5,11 @@
 #include <GL/freeglut.h>
 
 #include "GLUTCallbacks.h"
-#include "Cube.h"
 #include "Structures.h"
+#include "SceneObject.h"
 
 #define REFRESHRATE 16
-#define CUBE_COUNT 25
+#define OBJECT_COUNT 25 
 
 class HelloGL
 {
@@ -20,6 +20,9 @@ public:
     void Display();
     void Update();
 
+    void InitObjects();
+    void InitGL(int argc, char* argv[]);
+
 private:
-    Cube* cubes[CUBE_COUNT];
+    SceneObject* objects[OBJECT_COUNT];
 };
