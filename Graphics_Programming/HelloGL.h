@@ -7,6 +7,7 @@
 #include "GLUTCallbacks.h"
 #include "Structures.h"
 #include "SceneObject.h"
+#include "Texture2D.h"
 
 #define REFRESHRATE 16
 #define OBJECT_COUNT 25 
@@ -23,6 +24,14 @@ public:
     void InitObjects();
     void InitGL(int argc, char* argv[]);
 
+    // NEW: Text rendering method
+    void DrawText2D(const char* text, int x, int y);
+
 private:
     SceneObject* objects[OBJECT_COUNT];
+    Texture2D* myTexture;
+
+    // NEW: Variables for our HUD
+    int _score;
+    char _scoreText[256];
 };

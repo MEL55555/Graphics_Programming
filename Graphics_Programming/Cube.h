@@ -6,7 +6,7 @@
 class Cube : public SceneObject
 {
 public:
-    Cube(Mesh* mesh, float x, float y, float z);
+    Cube(Mesh* mesh, Texture2D* texture, float x, float y, float z);
     ~Cube();
 
     void Update() override;
@@ -14,5 +14,5 @@ public:
 
 private:
     float _rotation;
-    Vector3 _position;
+    // _position has been REMOVED from here!
 };
