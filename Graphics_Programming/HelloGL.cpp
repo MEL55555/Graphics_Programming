@@ -3,8 +3,8 @@
 #include "StaticObject.h"
 #include "MeshLoader.h"
 #include <cstdlib>
-#include <cstdio> // NEW: For formatting strings (sprintf_s)
-#include <cmath>  // NEW: For collision math (std::sqrt, std::pow)
+#include <cstdio> // For formatting strings (sprintf_s)
+#include <cmath>  // For collision math (std::sqrt, std::pow)
 
 float camX = 0.0f;
 float camY = 0.0f;
@@ -58,7 +58,7 @@ void HelloGL::InitGL(int argc, char* argv[])
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA | GLUT_DEPTH);
     glutInitWindowSize(800, 600);
     glutInitWindowPosition(100, 100);
-    glutCreateWindow("OBJ Loader - Polymorphism");
+    glutCreateWindow("OBJ Loader");
     glClearColor(0, 0, 0, 1);
 
     glEnable(GL_TEXTURE_2D);
@@ -117,7 +117,7 @@ void HelloGL::InitObjects()
 }
 
 // ==========================================
-// NEW: Function to draw 2D Text over the 3D scene
+// Function to draw 2D Text over the 3D scene
 // ==========================================
 void HelloGL::DrawText2D(const char* text, int x, int y)
 {
@@ -170,7 +170,7 @@ void HelloGL::Display()
         objects[i]->Draw();
 
     // ==========================================
-    // NEW: Draw the HUD Text
+    // Draw the HUD Text
     // ==========================================
     sprintf_s(_scoreText, "Bumps: %d | Move with W/A/S/D to crash into objects!", _score);
     DrawText2D(_scoreText, 10, 570); // Draw at the top left corner
@@ -185,7 +185,7 @@ void HelloGL::Update()
         objects[i]->Update();
 
         // ==========================================
-        // NEW: Basic Bounding Sphere Collision!
+        // Basic Bounding Sphere Collision!
         // ==========================================
         Vector3 objPos = objects[i]->GetPosition();
         float objRadius = objects[i]->GetBoundingRadius();
