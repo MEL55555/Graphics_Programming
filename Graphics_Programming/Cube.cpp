@@ -1,57 +1,53 @@
 #include "Cube.h"
+#include <cstdlib> 
 
 Cube::Cube(Mesh* mesh, Texture2D* texture, float x, float y, float z) : SceneObject(mesh, texture)
 {
     _rotation = 0.0f;
     _position = { x, y, z };
+    _boundingRadius = 5.0f;
+
+    // make it spin at random speeds
+    _rotationSpeed = (float)(rand() % 100) / 200.0f + 0.1f;
+    _rotationAxis = { (float)(rand() % 10) / 10.0f, (float)(rand() % 10) / 10.0f, (float)(rand() % 10) / 10.0f };
 }
 
 Cube::~Cube() {}
 
 void Cube::Update()
 {
-    _rotation += 0.2f;
-    if (_rotation >= 360) _rotation = 0;
+    // keep it turning
+    _rotation += _rotationSpeed;
+    if (_rotation >= 360.0f) _rotation = 0.0f;
+
+    for (auto child : _children) child->Update();
 }
 
 void Cube::Draw()
 {
-    if (_mesh->Vertices != nullptr && _mesh->Indices != nullptr)
-    {
-        if (_texture != nullptr) {
-            glBindTexture(GL_TEXTURE_2D, _texture->GetID());
-        }
+    if (_mesh == nullptr || _mesh->Vertices == nullptr) return;
 
-        glPushMatrix();
-        glTranslatef(_position.x, _position.y, _position.z);
-        glRotatef(_rotation, 1, 1, 0);
+    glPushMatrix();
+    glTranslatef(_position.x, _position.y, _position.z);
+    glRotatef(_rotation, _rotationAxis.x, _rotationAxis.y, _rotationAxis.z);
 
-        // Define how the light interacts with this specific object's surface
-        GLfloat mat_ambient[] = { 0.8f, 0.8f, 0.8f, 1.0f };
-        GLfloat mat_diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-        GLfloat mat_specular[] = { 0.5f, 0.5f, 0.5f, 1.0f };
-        glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
-        glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
-        glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-        glMaterialf(GL_FRONT, GL_SHININESS, 50.0f);
+    if (_texture != nullptr)  glBindTexture(GL_TEXTURE_2D, _texture->GetID());
 
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glEnableClientState(GL_COLOR_ARRAY);
-        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-        glEnableClientState(GL_NORMAL_ARRAY); // NEW
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glEnableClientState(GL_NORMAL_ARRAY);
 
-        glVertexPointer(3, GL_FLOAT, 0, _mesh->Vertices);
-        glColorPointer(3, GL_FLOAT, 0, _mesh->Colors);
-        glTexCoordPointer(2, GL_FLOAT, 0, _mesh->TexCoords);
-        glNormalPointer(GL_FLOAT, 0, _mesh->Normals); // NEW
+    // send data to gpu
+    glVertexPointer(3, GL_FLOAT, 0, _mesh->Vertices);
+    glTexCoordPointer(2, GL_FLOAT, 0, _mesh->TexCoords);
+    glNormalPointer(GL_FLOAT, 0, _mesh->Normals);
 
-        glDrawElements(GL_TRIANGLES, _mesh->IndexCount, GL_UNSIGNED_SHORT, _mesh->Indices);
+    glDrawElements(GL_TRIANGLES, _mesh->IndexCount, GL_UNSIGNED_SHORT, _mesh->Indices);
 
-        glDisableClientState(GL_NORMAL_ARRAY); // NEW
-        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-        glDisableClientState(GL_COLOR_ARRAY);
-        glDisableClientState(GL_VERTEX_ARRAY);
+    for (auto child : _children) child->Draw();
 
-        glPopMatrix();
-    }
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glPopMatrix();
 }

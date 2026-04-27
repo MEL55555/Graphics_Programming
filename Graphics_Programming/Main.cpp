@@ -1,7 +1,9 @@
 #include "HelloGL.h"
 
-int main(int argc, char* argv[])
+int  main(int argc, char* argv[])
 {
-    HelloGL* game = new HelloGL(argc, argv);
+    // start the game engine
+    HelloGL* game = new  HelloGL(argc, argv);
+
     return 0;
 }

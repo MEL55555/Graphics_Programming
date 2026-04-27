@@ -10,7 +10,6 @@ public:
     ~StaticObject();
 
     void Update() override;
-    void Draw() override;
-
-    
+    void  Draw() override;
+    // this is for things that dont move
 };

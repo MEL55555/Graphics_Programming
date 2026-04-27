@@ -3,14 +3,11 @@
 #include <gl/GL.h>
 #include <gl/GLU.h>
 #include <GL/freeglut.h>
-
-#include "GLUTCallbacks.h"
 #include "Structures.h"
 #include "SceneObject.h"
 #include "Texture2D.h"
 
 #define REFRESHRATE 16
-#define OBJECT_COUNT 25 
 
 class HelloGL
 {
@@ -20,18 +17,19 @@ public:
 
     void Display();
     void Update();
-
     void InitObjects();
     void InitGL(int argc, char* argv[]);
-
-    // NEW: Text rendering method
     void DrawText2D(const char* text, int x, int y);
 
-private:
-    SceneObject* objects[OBJECT_COUNT];
-    Texture2D* myTexture;
+    // logic for grabbing and dropping
+    void TryPickupOrDrop();
+    void AddObjectToList(SceneObject* newObj);
+    void DeleteList(ListNode** node);
 
-    // NEW: Variables for our HUD
+private:
+    ListNode* _root;   // start of the list
+    Texture2D* myTexture;
+    Texture2D* skyTexture;
     int _score;
     char _scoreText[256];
 };
