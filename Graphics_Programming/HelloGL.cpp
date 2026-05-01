@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cstdio> 
 #include <cmath>  
+#include <iostream>
 
 float camX = 0.0f; float camY = 0.0f; float camZ = -20.0f;
 float  rotX = 0.0f; float rotY = 0.0f;
@@ -61,7 +62,7 @@ void MouseMotion(int x, int y) {
 
 HelloGL::HelloGL(int argc, char* argv[]) {
     currentInstance = this;
-    _root = nullptr; myTexture = nullptr; skyTexture = nullptr; _score = 0;
+    _root = nullptr; myTexture = nullptr; skyTexture = nullptr; grassTexture = nullptr; _score = 0;
     InitGL(argc, argv);
     InitObjects();
     glutMainLoop();
@@ -70,7 +71,8 @@ HelloGL::HelloGL(int argc, char* argv[]) {
 HelloGL::~HelloGL() {
     DeleteList(&_root);
     if (myTexture) delete myTexture;
-    if (skyTexture)  delete skyTexture;
+    if (skyTexture) delete skyTexture;
+    if (grassTexture) delete grassTexture;
 }
 
 void HelloGL::TryPickupOrDrop() {
@@ -119,14 +121,8 @@ void HelloGL::InitGL(int argc, char* argv[]) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
 
-    int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-    int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-    int startX = (screenWidth - WINDOW_WIDTH) / 2;
-    int startY = (screenHeight - WINDOW_HEIGHT) / 2;
-
     glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-    glutInitWindowPosition(startX, startY);
-    glutCreateWindow("graphics programming");
+    glutCreateWindow("Smooth Mountains Engine");
 
     glutSetCursor(GLUT_CURSOR_NONE);
     glutWarpPointer(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
@@ -136,6 +132,12 @@ void HelloGL::InitGL(int argc, char* argv[]) {
     glEnable(GL_LIGHT0);
     glEnable(GL_TEXTURE_2D);
 
+    // FIX 1: Normalize normals so lighting intensity is consistent across hills
+    glEnable(GL_NORMALIZE);
+
+    // FIX 2: Set the shading model to SMOOTH to enable Gouraud Shading
+    glShadeModel(GL_SMOOTH);
+
     glutDisplayFunc(GLUTCallbacks::Display);
     glutKeyboardFunc(Keyboard);
     glutPassiveMotionFunc(MouseMotion);
@@ -144,13 +146,21 @@ void HelloGL::InitGL(int argc, char* argv[]) {
 
 void HelloGL::InitObjects() {
     Mesh* barrelMesh = MeshLoader::Load((char*)"barrel.obj");
+
     myTexture = new Texture2D();
     myTexture->Load((char*)"barrel.raw", 512, 512);
+
     skyTexture = new Texture2D();
     skyTexture->Load((char*)"sky.raw", 512, 512);
 
+    grassTexture = new Texture2D();
+    grassTexture->Load((char*)"grass.raw", 512, 512);
+
+    _levelFloor = new Floor(grassTexture, 1000.0f, 60.0f);
+    AddObjectToList(_levelFloor);
+
     for (int i = 0; i < 15; i++) {
-        SceneObject* p = new Cube(barrelMesh, myTexture, (float)(rand() % 100 - 50), 0.0f, (float)(rand() % 100 - 50));
+        SceneObject* p = new Cube(barrelMesh, myTexture, (float)(rand() % 200 - 100), 0.0f, (float)(rand() % 200 - 100));
         AddObjectToList(p);
     }
 }
@@ -161,10 +171,10 @@ void HelloGL::Display() {
     gluPerspective(45.0f, (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 3000.0f);
     glMatrixMode(GL_MODELVIEW); glLoadIdentity();
 
-    // draw skybox
+    // Draw Skybox
     glPushMatrix();
     glDisable(GL_LIGHTING); glDisable(GL_DEPTH_TEST);
-    glRotatef(rotX, 1.0f, 0.0f, 0.0f);
+    glRotatef(rotX, 0.0f, 0.0f, 0.0f);
     glRotatef(rotY, 0.0f, 1.0f, 0.0f);
     glScalef(1500.0f, 1500.0f, 1500.0f);
     if (skyTexture) glBindTexture(GL_TEXTURE_2D, skyTexture->GetID());
@@ -185,7 +195,6 @@ void HelloGL::Display() {
     glEnable(GL_DEPTH_TEST); glEnable(GL_LIGHTING);
     glPopMatrix();
 
-    // move camera
     glRotatef(rotX, 1.0f, 0.0f, 0.0f);
     glRotatef(rotY, 0.0f, 1.0f, 0.0f);
     glTranslatef(camX, camY, camZ);
@@ -199,11 +208,8 @@ void HelloGL::Display() {
         temp = temp->next;
     }
 
-    // drawing hud last so its on top 
     sprintf_s(_scoreText, 256, "barrels bumped: %d", _score);
-    DrawText2D(_scoreText, 50, 1000); // moved it higher up on screen
-
-    // crosshair in the middle
+    DrawText2D(_scoreText, 50, 1000);
     DrawText2D("+", (WINDOW_WIDTH / 2) - 5, (WINDOW_HEIGHT / 2) - 5);
 
     glutSwapBuffers();
@@ -211,31 +217,92 @@ void HelloGL::Display() {
 
 void HelloGL::Update() {
     ListNode* temp = _root;
+
     while (temp != nullptr) {
-        if (temp->object->IsHeld()) {
+        SceneObject* obj = temp->object;
+        Vector3 objPos = obj->GetPosition();
+        float radius = obj->GetBoundingRadius();
+
+        if (obj->IsHeld()) {
             float radY = rotY * (3.14159f / 180.0f);
             float radX = rotX * (3.14159f / 180.0f);
-            float  dist = 18.0f;
+            float dist = 18.0f;
+
             float newX = -camX + (dist * sin(radY) * cos(radX));
             float newY = -camY - (dist * sin(radX));
             float newZ = -camZ - (dist * cos(radY) * cos(radX));
-            temp->object->SetPosition(newX, newY, newZ);
+
+            
+            float floorH = _levelFloor->GetTerrainHeight(newX, newZ);
+            if (newY < floorH + radius) newY = floorH + radius;
+
+            obj->SetPosition(newX, newY, newZ);
         }
-        else {
-            // bump into barrels
-            Vector3 objPos = temp->object->GetPosition();
+        else if (obj != (SceneObject*)_levelFloor) {
+
+            
+            float floorH = _levelFloor->GetTerrainHeight(objPos.x, objPos.z);
+            if (objPos.y < floorH + radius) {
+                obj->SetPosition(objPos.x, floorH + radius, objPos.z);
+                objPos.y = floorH + radius;
+            }
+
+            
+            ListNode* otherNode = _root;
+            while (otherNode != nullptr) {
+                SceneObject* other = otherNode->object;
+
+                if (other != obj && other != (SceneObject*)_levelFloor) {
+
+                    Vector3 otherPos = other->GetPosition();
+                    float otherRadius = other->GetBoundingRadius();
+
+                    float dx = objPos.x - otherPos.x;
+                    float dz = objPos.z - otherPos.z;
+
+                    float dist = sqrt(dx * dx + dz * dz);
+                    float minDist = radius + otherRadius;
+
+                    if (dist < minDist && dist > 0.001f) {
+
+                        float overlap = (minDist - dist) * 0.5f;
+
+                        dx /= dist;
+                        dz /= dist;
+
+                        // push both objects apart
+                        obj->SetPosition(
+                            objPos.x + dx * overlap,
+                            objPos.y,
+                            objPos.z + dz * overlap
+                        );
+
+                        other->SetPosition(
+                            otherPos.x - dx * overlap,
+                            otherPos.y,
+                            otherPos.z - dz * overlap
+                        );
+                    }
+                }
+
+                otherNode = otherNode->next;
+            }
+
+            // Camera bump (unchanged)
             float dX = objPos.x - (-camX);
-            float dY = objPos.y - (-camY);
             float dZ = objPos.z - (-camZ);
-            float dist = sqrt(dX * dX + dY * dY + dZ * dZ);
+            float dist = sqrt(dX * dX + dZ * dZ);
+
             if (dist < 6.0f) {
-                temp->object->SetPosition(objPos.x + dX, 0, objPos.z + dZ);
+                obj->SetPosition(objPos.x + dX, objPos.y, objPos.z + dZ);
                 _score++;
             }
         }
-        temp->object->Update();
+
+        obj->Update();
         temp = temp->next;
     }
+
     glutPostRedisplay();
 }
 
@@ -257,12 +324,8 @@ void HelloGL::DeleteList(ListNode** node) {
 }
 
 void HelloGL::DrawText2D(const char* text, int x, int y) {
-    glDisable(GL_LIGHTING);
-    glDisable(GL_DEPTH_TEST); // text wont get hidden by barrels
-    glDisable(GL_TEXTURE_2D);
-
+    glDisable(GL_LIGHTING); glDisable(GL_DEPTH_TEST); glDisable(GL_TEXTURE_2D);
     glColor3f(1.0f, 1.0f, 1.0f);
-
     glMatrixMode(GL_PROJECTION); glPushMatrix(); glLoadIdentity();
     gluOrtho2D(0, WINDOW_WIDTH, 0, WINDOW_HEIGHT);
     glMatrixMode(GL_MODELVIEW); glPushMatrix(); glLoadIdentity();
@@ -272,8 +335,5 @@ void HelloGL::DrawText2D(const char* text, int x, int y) {
     }
     glPopMatrix(); glMatrixMode(GL_PROJECTION); glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
-
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_LIGHTING);
+    glEnable(GL_TEXTURE_2D); glEnable(GL_DEPTH_TEST); glEnable(GL_LIGHTING);
 }

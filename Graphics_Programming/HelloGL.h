@@ -6,6 +6,7 @@
 #include "Structures.h"
 #include "SceneObject.h"
 #include "Texture2D.h"
+#include "Floor.h" // Add this include
 
 #define REFRESHRATE 16
 
@@ -21,15 +22,16 @@ public:
     void InitGL(int argc, char* argv[]);
     void DrawText2D(const char* text, int x, int y);
 
-    // logic for grabbing and dropping
     void TryPickupOrDrop();
     void AddObjectToList(SceneObject* newObj);
     void DeleteList(ListNode** node);
 
 private:
-    ListNode* _root;   // start of the list
+    ListNode* _root;
     Texture2D* myTexture;
     Texture2D* skyTexture;
+    Texture2D* grassTexture;
+    Floor* _levelFloor;
     int _score;
     char _scoreText[256];
 };

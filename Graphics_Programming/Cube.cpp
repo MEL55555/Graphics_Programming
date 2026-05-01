@@ -5,7 +5,7 @@ Cube::Cube(Mesh* mesh, Texture2D* texture, float x, float y, float z) : SceneObj
 {
     _rotation = 0.0f;
     _position = { x, y, z };
-    _boundingRadius = 5.0f;
+    _boundingRadius = 3.0f;
 
     // make it spin at random speeds
     _rotationSpeed = (float)(rand() % 100) / 200.0f + 0.1f;
