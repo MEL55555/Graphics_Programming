@@ -60,14 +60,20 @@ void MouseMotion(int x, int y) {
     }
 }
 
+//[cite: 2] Initializing the Linked List head as nullptr
 HelloGL::HelloGL(int argc, char* argv[]) {
     currentInstance = this;
-    _root = nullptr; myTexture = nullptr; skyTexture = nullptr; grassTexture = nullptr; _score = 0;
+    _root = nullptr;
+    myTexture = nullptr;
+    skyTexture = nullptr;
+    grassTexture = nullptr;
+    _score = 0;
     InitGL(argc, argv);
     InitObjects();
     glutMainLoop();
 }
 
+//[cite: 2] Using the DeleteList tutorial logic for cleanup
 HelloGL::~HelloGL() {
     DeleteList(&_root);
     if (myTexture) delete myTexture;
@@ -122,7 +128,7 @@ void HelloGL::InitGL(int argc, char* argv[]) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
 
     glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-    glutCreateWindow("Smooth Mountains Engine");
+    glutCreateWindow("Graphics Programming - Linked Lists & Smooth Terrain");
 
     glutSetCursor(GLUT_CURSOR_NONE);
     glutWarpPointer(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
@@ -132,10 +138,8 @@ void HelloGL::InitGL(int argc, char* argv[]) {
     glEnable(GL_LIGHT0);
     glEnable(GL_TEXTURE_2D);
 
-    // FIX 1: Normalize normals so lighting intensity is consistent across hills
+    // STATE FIXES: Ensure normals and shading are set for the Floor tutorial
     glEnable(GL_NORMALIZE);
-
-    // FIX 2: Set the shading model to SMOOTH to enable Gouraud Shading
     glShadeModel(GL_SMOOTH);
 
     glutDisplayFunc(GLUTCallbacks::Display);
@@ -171,7 +175,7 @@ void HelloGL::Display() {
     gluPerspective(45.0f, (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 3000.0f);
     glMatrixMode(GL_MODELVIEW); glLoadIdentity();
 
-    // Draw Skybox
+    // Skybox Rendering
     glPushMatrix();
     glDisable(GL_LIGHTING); glDisable(GL_DEPTH_TEST);
     glRotatef(rotX, 0.0f, 0.0f, 0.0f);
@@ -202,6 +206,7 @@ void HelloGL::Display() {
     GLfloat light_pos[] = { 0, 100, 0, 1 };
     glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
 
+    //[cite: 2] Iterating through the linked list for Draw
     ListNode* temp = _root;
     while (temp != nullptr) {
         temp->object->Draw();
@@ -216,6 +221,7 @@ void HelloGL::Display() {
 }
 
 void HelloGL::Update() {
+    //[cite: 2] Iterating through the linked list for Update
     ListNode* temp = _root;
 
     while (temp != nullptr) {
@@ -232,69 +238,53 @@ void HelloGL::Update() {
             float newY = -camY - (dist * sin(radX));
             float newZ = -camZ - (dist * cos(radY) * cos(radX));
 
-            
             float floorH = _levelFloor->GetTerrainHeight(newX, newZ);
             if (newY < floorH + radius) newY = floorH + radius;
 
             obj->SetPosition(newX, newY, newZ);
         }
         else if (obj != (SceneObject*)_levelFloor) {
-
-            
             float floorH = _levelFloor->GetTerrainHeight(objPos.x, objPos.z);
             if (objPos.y < floorH + radius) {
                 obj->SetPosition(objPos.x, floorH + radius, objPos.z);
                 objPos.y = floorH + radius;
             }
 
-            
+            // Object-to-Object Collisions using the List
             ListNode* otherNode = _root;
             while (otherNode != nullptr) {
                 SceneObject* other = otherNode->object;
 
                 if (other != obj && other != (SceneObject*)_levelFloor) {
-
                     Vector3 otherPos = other->GetPosition();
                     float otherRadius = other->GetBoundingRadius();
 
                     float dx = objPos.x - otherPos.x;
                     float dz = objPos.z - otherPos.z;
-
-                    float dist = sqrt(dx * dx + dz * dz);
+                    float distSq = dx * dx + dz * dz;
                     float minDist = radius + otherRadius;
 
-                    if (dist < minDist && dist > 0.001f) {
-
+                    if (distSq < minDist * minDist && distSq > 0.0001f) {
+                        float dist = sqrt(distSq);
                         float overlap = (minDist - dist) * 0.5f;
 
                         dx /= dist;
                         dz /= dist;
 
-                        // push both objects apart
-                        obj->SetPosition(
-                            objPos.x + dx * overlap,
-                            objPos.y,
-                            objPos.z + dz * overlap
-                        );
-
-                        other->SetPosition(
-                            otherPos.x - dx * overlap,
-                            otherPos.y,
-                            otherPos.z - dz * overlap
-                        );
+                        obj->SetPosition(objPos.x + dx * overlap, objPos.y, objPos.z + dz * overlap);
+                        other->SetPosition(otherPos.x - dx * overlap, otherPos.y, otherPos.z - dz * overlap);
                     }
                 }
-
                 otherNode = otherNode->next;
             }
 
-            // Camera bump (unchanged)
-            float dX = objPos.x - (-camX);
-            float dZ = objPos.z - (-camZ);
-            float dist = sqrt(dX * dX + dZ * dZ);
+            // Camera bump
+            float camDistX = objPos.x - (-camX);
+            float camDistZ = objPos.z - (-camZ);
+            float camDist = sqrt(camDistX * camDistX + camDistZ * camDistZ);
 
-            if (dist < 6.0f) {
-                obj->SetPosition(objPos.x + dX, objPos.y, objPos.z + dZ);
+            if (camDist < 6.0f) {
+                obj->SetPosition(objPos.x + (camDistX / camDist) * 2.0f, objPos.y, objPos.z + (camDistZ / camDist) * 2.0f);
                 _score++;
             }
         }
@@ -306,6 +296,7 @@ void HelloGL::Update() {
     glutPostRedisplay();
 }
 
+//[cite: 2] Tutorial 13 Task 1: InsertFirst logic
 void HelloGL::AddObjectToList(SceneObject* newObj) {
     ListNode* newNode = new ListNode;
     newNode->object = newObj;
@@ -313,11 +304,13 @@ void HelloGL::AddObjectToList(SceneObject* newObj) {
     _root = newNode;
 }
 
+//[cite: 2] Tutorial 13 Task 1: Recursive-style iterative cleanup
 void HelloGL::DeleteList(ListNode** node) {
     ListNode* pTemp = *node;
     while (pTemp != nullptr) {
         ListNode* next = pTemp->next;
-        delete pTemp->object; delete pTemp;
+        delete pTemp->object;
+        delete pTemp;
         pTemp = next;
     }
     *node = nullptr;
