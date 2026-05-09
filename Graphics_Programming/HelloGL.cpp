@@ -126,7 +126,7 @@ void HelloGL::InitGL(int argc, char* argv[]) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
 
     glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-    glutCreateWindow("Graphics Programming - Linked Lists & Smooth Terrain");
+    glutCreateWindow("3DSimulation");
 
     glutSetCursor(GLUT_CURSOR_NONE);
     glutWarpPointer(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
