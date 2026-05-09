@@ -21,19 +21,19 @@ void Keyboard(unsigned char key, int x, int y) {
 
     switch (key) {
     case 27:  exit(0); break;
-    case 'w':
-        camX += sin(radY) * moveSpeed;
-        camZ -= cos(radY) * moveSpeed;
-        break;
-    case 's':
+    case 'w': // Move Forward (Subtract from Z relative to rotation)
         camX -= sin(radY) * moveSpeed;
         camZ += cos(radY) * moveSpeed;
         break;
-    case 'a':
+    case 's': // Move Backward (Add to Z relative to rotation)
+        camX += sin(radY) * moveSpeed;
+        camZ -= cos(radY) * moveSpeed;
+        break;
+    case 'a': // Strafe Left
         camX += cos(radY) * moveSpeed;
         camZ += sin(radY) * moveSpeed;
         break;
-    case 'd':
+    case 'd': // Strafe Right
         camX -= cos(radY) * moveSpeed;
         camZ -= sin(radY) * moveSpeed;
         break;
@@ -203,7 +203,7 @@ void HelloGL::Display() {
     GLfloat light_pos[] = { 0, 100, 0, 1 };
     glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
 
-    // render the linked list
+    // render everything in the linked list
     ListNode* temp = _root;
     while (temp != nullptr) {
         temp->object->Draw();
@@ -246,7 +246,7 @@ void HelloGL::Update() {
                 objPos.y = floorH + radius;
             }
 
-            // check collisions
+            // check for hitting other barrels
             ListNode* otherNode = _root;
             while (otherNode != nullptr) {
                 SceneObject* other = otherNode->object;
@@ -274,7 +274,7 @@ void HelloGL::Update() {
                 otherNode = otherNode->next;
             }
 
-            // walk into a barrel
+            // walk into a barrel logic
             float camDistX = objPos.x - (-camX);
             float camDistZ = objPos.z - (-camZ);
             float camDist = sqrt(camDistX * camDistX + camDistZ * camDistZ);
