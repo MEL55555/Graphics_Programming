@@ -1,10 +1,9 @@
-
 #include "GLUTCallbacks.h"
 #include "HelloGL.h"
 
 namespace
 {
-    // local pointer to the engine
+	// local pointer to the main class so we can call the display and update 
     HelloGL* helloGL = nullptr;
 }
 
@@ -19,7 +18,7 @@ namespace GLUTCallbacks
     {
         if (helloGL != nullptr)
         {
-            // draw the frame
+			// go draw the scene
             helloGL->Display();
         }
     }
@@ -28,11 +27,11 @@ namespace GLUTCallbacks
     {
         if (helloGL != nullptr)
         {
-            // run the update logic
+            // run the actual game logic update
             helloGL->Update();
         }
 
-        // reset the timer for next time
+        // set it up to run again so it keeps looping
         glutTimerFunc(preferredRefresh, GLUTCallbacks::Timer, preferredRefresh);
     }
 }

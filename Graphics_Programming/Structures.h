@@ -7,14 +7,14 @@
 struct Vector3 { float x, y, z; };
 struct Vector4 { float x, y, z, w; };
 
-// points and colors
+// dots and colors
 struct Vertex { float x, y, z; };
 struct Color { float r, g, b; };
 struct TexCoord { float u, v; };
 
 class SceneObject;
 
-// Task 1: Create a ListNode struct for dynamic storage
+// making a list for all the stuff
 struct ListNode {
     SceneObject* object;
     ListNode* next;

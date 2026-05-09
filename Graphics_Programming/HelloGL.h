@@ -17,22 +17,22 @@ public:
 
     void Display();
     void Update();
-    void InitObjects();
+    void InitObjects(); // making all the stuff
     void InitGL(int argc, char* argv[]);
-    void DrawText2D(const char* text, int x, int y);
+    void DrawText2D(const char* text, int x, int y); // write words on the screen
 
     void TryPickupOrDrop();
 
-    //[cite: 2] Linked List management functions
+    // functions to mess with the list of stuff
     void AddObjectToList(SceneObject* newObj);
     void DeleteList(ListNode** node);
 
 private:
-    ListNode* _root; // Head of the Linked List[cite: 2]
+    ListNode* _root; // the start of the big list of things
     Texture2D* myTexture;
     Texture2D* skyTexture;
     Texture2D* grassTexture;
     Floor* _levelFloor;
-    int _score;
+    int _score; // the points player has
     char _scoreText[256];
 };

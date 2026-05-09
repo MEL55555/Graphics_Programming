@@ -11,5 +11,5 @@ public:
 
     void Update() override;
     void  Draw() override;
-    // this is for things that dont move
+    // for the stuff that just sits there and doesnt move
 };

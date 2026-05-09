@@ -11,14 +11,14 @@ Floor::Floor(Texture2D* texture, float size, float tiling) : SceneObject(nullptr
 Floor::~Floor() {}
 
 
-// ?? MUCH SOFTER TERRAIN (small hills, not mountains)
+// figure out how high the ground is at this spot
 float Floor::GetTerrainHeight(float x, float z) {
-    float y = sin(x * 0.03f) * cos(z * 0.03f) * 9.0f; // LOWER + SMOOTHER
+    float y = sin(x * 0.03f) * cos(z * 0.03f) * 9.0f;
     return y + _position.y;
 }
 
 
-// ?? NORMAL via neighbour sampling (super reliable)
+// math for lighting so the hills look right
 Vector3 GetNormal(float x, float z, Floor* floor) {
     float offset = 1.0f;
 
@@ -30,10 +30,9 @@ Vector3 GetNormal(float x, float z, Floor* floor) {
     Vector3 normal;
 
     normal.x = hL - hR;
-    normal.y = 2.0f; // strength of "up"
+    normal.y = 2.0f;
     normal.z = hD - hU;
 
-    // normalize
     float length = sqrt(normal.x * normal.x + normal.y * normal.y + normal.z * normal.z);
     normal.x /= length;
     normal.y /= length;
@@ -60,7 +59,6 @@ void Floor::Draw() {
 
     glPushMatrix();
 
-    // ?? Higher resolution = smoother terrain
     int gridRes = 150;
     float step = (_size * 2) / gridRes;
 
@@ -78,13 +76,13 @@ void Floor::Draw() {
             float y1 = GetTerrainHeight(xPos, z1);
             float y2 = GetTerrainHeight(xPos, z2);
 
-            //  NORMAL 1
+            // put the first point down 
             Vector3 n1 = GetNormal(xPos, z1, this);
             glNormal3f(n1.x, n1.y, n1.z);
             glTexCoord2f((float)x / gridRes * _tiling, (float)z / gridRes * _tiling);
             glVertex3f(xPos, y1, z1);
 
-            //  NORMAL 2
+            // put the second point down
             Vector3 n2 = GetNormal(xPos, z2, this);
             glNormal3f(n2.x, n2.y, n2.z);
             glTexCoord2f((float)x / gridRes * _tiling, (float)(z + 1) / gridRes * _tiling);

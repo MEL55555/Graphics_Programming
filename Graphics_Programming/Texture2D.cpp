@@ -6,7 +6,7 @@ Texture2D::Texture2D() : _ID(0), _width(0), _height(0) {}
 
 Texture2D::~Texture2D()
 {
-    // get rid of the texture
+    // get rid of the texture data from memory
     glDeleteTextures(1, &_ID);
 }
 
@@ -19,7 +19,7 @@ bool Texture2D::Load(char* path, int width, int height)
     _width = width;
     _height = height;
 
-    // make space for the image pixels
+    // make space for all the color dots
     char* tempTextureData = new char[width * height * 3];
     file.read(tempTextureData, width * height * 3);
     file.close();
@@ -27,13 +27,13 @@ bool Texture2D::Load(char* path, int width, int height)
     glGenTextures(1, &_ID);
     glBindTexture(GL_TEXTURE_2D, _ID);
 
-    // build the image layers
+    // make the different size versions of the pic
     gluBuild2DMipmaps(GL_TEXTURE_2D, 3, width, height, GL_RGB, GL_UNSIGNED_BYTE, tempTextureData);
 
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    // make it tile
+    // make the image repeat over and over
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 

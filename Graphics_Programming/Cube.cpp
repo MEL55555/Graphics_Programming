@@ -7,7 +7,7 @@ Cube::Cube(Mesh* mesh, Texture2D* texture, float x, float y, float z) : SceneObj
     _position = { x, y, z };
     _boundingRadius = 3.0f;
 
-    // make it spin at random speeds
+    // give it some random spinning speeds
     _rotationSpeed = (float)(rand() % 100) / 200.0f + 0.1f;
     _rotationAxis = { (float)(rand() % 10) / 10.0f, (float)(rand() % 10) / 10.0f, (float)(rand() % 10) / 10.0f };
 }
@@ -16,7 +16,7 @@ Cube::~Cube() {}
 
 void Cube::Update()
 {
-    // keep it turning
+	// make the cube spin at its own speed and direction
     _rotation += _rotationSpeed;
     if (_rotation >= 360.0f) _rotation = 0.0f;
 
@@ -37,7 +37,7 @@ void Cube::Draw()
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glEnableClientState(GL_NORMAL_ARRAY);
 
-    // send data to gpu
+    // move the data over to the gpu 
     glVertexPointer(3, GL_FLOAT, 0, _mesh->Vertices);
     glTexCoordPointer(2, GL_FLOAT, 0, _mesh->TexCoords);
     glNormalPointer(GL_FLOAT, 0, _mesh->Normals);

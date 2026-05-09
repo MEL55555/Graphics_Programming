@@ -20,7 +20,7 @@ void Keyboard(unsigned char key, int x, int y) {
     float radY = rotY * (3.14159f / 180.0f);
 
     switch (key) {
-    case 27:  exit(0); break;
+    case 27:  exit(0); break; // quit game
     case 'w':
         camX -= sin(radY) * moveSpeed;
         camZ += cos(radY) * moveSpeed;
@@ -37,8 +37,8 @@ void Keyboard(unsigned char key, int x, int y) {
         camX -= cos(radY) * moveSpeed;
         camZ -= sin(radY) * moveSpeed;
         break;
-    case 'g': case 'G': if (currentInstance) currentInstance->TryPickupOrDrop(); break;
-    case 'r':  camX = 0.0f; camY = 0.0f; camZ = -20.0f; rotX = 0.0f; rotY = 0.0f; break;
+	case 'g': case 'G': if (currentInstance) currentInstance->TryPickupOrDrop(); break; // grab or drop
+    case 'r':  camX = 0.0f; camY = 0.0f; camZ = -20.0f; rotX = 0.0f; rotY = 0.0f; break; // reset cam
     }
 }
 
@@ -56,11 +56,10 @@ void MouseMotion(int x, int y) {
         if (rotX > 90.0f) rotX = 90.0f;
         if (rotX < -90.0f) rotX = -90.0f;
 
-        glutWarpPointer(centerX, centerY);
+        glutWarpPointer(centerX, centerY); // keep mouse in middle
     }
 }
 
-//[cite: 2] Initializing the Linked List head as nullptr
 HelloGL::HelloGL(int argc, char* argv[]) {
     currentInstance = this;
     _root = nullptr;
@@ -73,9 +72,8 @@ HelloGL::HelloGL(int argc, char* argv[]) {
     glutMainLoop();
 }
 
-//[cite: 2] Using the DeleteList tutorial logic for cleanup
 HelloGL::~HelloGL() {
-    DeleteList(&_root);
+	DeleteList(&_root); // kill the list and all the objects in it
     if (myTexture) delete myTexture;
     if (skyTexture) delete skyTexture;
     if (grassTexture) delete grassTexture;
@@ -85,7 +83,7 @@ void HelloGL::TryPickupOrDrop() {
     ListNode* temp = _root;
     while (temp != nullptr) {
         if (temp->object->IsHeld()) {
-            temp->object->SetIsHeld(false);
+			temp->object->SetIsHeld(false); // drop it if we are already holding something
             return;
         }
         temp = temp->next;
@@ -119,7 +117,7 @@ void HelloGL::TryPickupOrDrop() {
         }
         temp = temp->next;
     }
-    if (bestTarget) bestTarget->SetIsHeld(true);
+    if (bestTarget) bestTarget->SetIsHeld(true); // pick up the closest thing we are looking at 
 }
 
 void HelloGL::InitGL(int argc, char* argv[]) {
@@ -138,7 +136,6 @@ void HelloGL::InitGL(int argc, char* argv[]) {
     glEnable(GL_LIGHT0);
     glEnable(GL_TEXTURE_2D);
 
-    // STATE FIXES: Ensure normals and shading are set for the Floor tutorial
     glEnable(GL_NORMALIZE);
     glShadeModel(GL_SMOOTH);
 
@@ -175,7 +172,7 @@ void HelloGL::Display() {
     gluPerspective(45.0f, (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 3000.0f);
     glMatrixMode(GL_MODELVIEW); glLoadIdentity();
 
-    // Skybox Rendering
+	// drawing the big sky box that is always around the player
     glPushMatrix();
     glDisable(GL_LIGHTING); glDisable(GL_DEPTH_TEST);
     glRotatef(rotX, 0.0f, 0.0f, 0.0f);
@@ -206,7 +203,7 @@ void HelloGL::Display() {
     GLfloat light_pos[] = { 0, 100, 0, 1 };
     glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
 
-    //[cite: 2] Iterating through the linked list for Draw
+    // go through the list and draw everything 
     ListNode* temp = _root;
     while (temp != nullptr) {
         temp->object->Draw();
@@ -221,7 +218,7 @@ void HelloGL::Display() {
 }
 
 void HelloGL::Update() {
-    //[cite: 2] Iterating through the linked list for Update
+	// go through the list and update everything and do all the game logic
     ListNode* temp = _root;
 
     while (temp != nullptr) {
@@ -250,7 +247,7 @@ void HelloGL::Update() {
                 objPos.y = floorH + radius;
             }
 
-            // Object-to-Object Collisions using the List
+			// check if objects are hitting each other and push them apart if they are
             ListNode* otherNode = _root;
             while (otherNode != nullptr) {
                 SceneObject* other = otherNode->object;
@@ -278,7 +275,7 @@ void HelloGL::Update() {
                 otherNode = otherNode->next;
             }
 
-            // Camera bump
+			// see if we walked into a barrel and if so push it away and give points
             float camDistX = objPos.x - (-camX);
             float camDistZ = objPos.z - (-camZ);
             float camDist = sqrt(camDistX * camDistX + camDistZ * camDistZ);
@@ -296,7 +293,6 @@ void HelloGL::Update() {
     glutPostRedisplay();
 }
 
-//[cite: 2] Tutorial 13 Task 1: InsertFirst logic
 void HelloGL::AddObjectToList(SceneObject* newObj) {
     ListNode* newNode = new ListNode;
     newNode->object = newObj;
@@ -304,7 +300,6 @@ void HelloGL::AddObjectToList(SceneObject* newObj) {
     _root = newNode;
 }
 
-//[cite: 2] Tutorial 13 Task 1: Recursive-style iterative cleanup
 void HelloGL::DeleteList(ListNode** node) {
     ListNode* pTemp = *node;
     while (pTemp != nullptr) {

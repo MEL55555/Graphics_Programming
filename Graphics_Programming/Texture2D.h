@@ -14,7 +14,7 @@ public:
     Texture2D();
     ~Texture2D();
 
-    // gets the picture data 
+    // grabs the image file
     bool  Load(char* path, int width, int height);
 
     GLuint  GetID() const { return _ID; }

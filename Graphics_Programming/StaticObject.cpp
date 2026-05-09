@@ -10,6 +10,7 @@ StaticObject::~StaticObject() {}
 
 void StaticObject::Update()
 {
+    // just update the kids since this thing doesnt move
     for (auto child : _children) {
         child->Update();
     }
@@ -28,7 +29,7 @@ void StaticObject::Draw()
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glEnableClientState(GL_NORMAL_ARRAY);
 
-    // set up the pointers
+    // point to the model data
     glVertexPointer(3, GL_FLOAT, 0, _mesh->Vertices);
     glTexCoordPointer(2, GL_FLOAT, 0, _mesh->TexCoords);
     glNormalPointer(GL_FLOAT, 0, _mesh->Normals);

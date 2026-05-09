@@ -5,14 +5,14 @@
 class Floor : public SceneObject {
 private:
     Texture2D* _texture;
-    float _size;
-    float _tiling;
+    float _size; // how big the ground is
+    float _tiling; // how many times the pic repeats
 
 public:
     Floor(Texture2D* texture, float size, float tiling);
     ~Floor();
 
-    float GetTerrainHeight(float x, float z); // Required for physics
+    float GetTerrainHeight(float x, float z); // need this so we dont fall through the floor
     void Update() override;
-    void Draw() override;
+    void Draw() override; // put the floor on the screen
 };

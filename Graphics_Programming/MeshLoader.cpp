@@ -1,4 +1,3 @@
-
 #include "MeshLoader.h"
 #include <fstream>
 #include <sstream>
@@ -6,7 +5,7 @@
 #include <vector>
 #include <map>
 
-// helper to keep track of points
+// helper to keep track of the dots we already made
 struct PackedVertex {
     int v, vt, vn;
     bool operator<(const PackedVertex that) const {
@@ -20,7 +19,7 @@ Mesh* MeshLoader::Load(char* path)
     if (!file.is_open())
         return nullptr;
 
-    // lists for the points and textures
+    // bunch of lists to hold the raw data from the file
     std::vector<Vertex> temp_vertices;
     std::vector<TexCoord> temp_uvs;
     std::vector<Vector3> temp_normals;
@@ -39,20 +38,20 @@ Mesh* MeshLoader::Load(char* path)
         std::string type;
         ss >> type;
 
-        if (type == "v") {
+        if (type == "v") { // found a vertex
             Vertex v; ss >> v.x >> v.y >> v.z;
             temp_vertices.push_back(v);
         }
-        else if (type == "vt") {
+        else if (type == "vt") { // found a texture spot
             TexCoord tc; ss >> tc.u >> tc.v;
             temp_uvs.push_back(tc);
         }
-        else if (type == "vn") {
+        else if (type == "vn") { // found a normal
             Vector3 vn; ss >> vn.x >> vn.y >> vn.z;
             temp_normals.push_back(vn);
         }
         else if (type == "f") {
-            // go through the faces
+            // grab the three corners of the triangle
             for (int i = 0; i < 3; i++) {
                 std::string vertexStr;
                 ss >> vertexStr;
@@ -74,7 +73,7 @@ Mesh* MeshLoader::Load(char* path)
 
                 PackedVertex packed = { vIdx, vtIdx, vnIdx };
 
-                // check if we already have this point
+                // check if we used this point before so we dont double up
                 if (vertexCache.count(packed)) {
                     out_indices.push_back(vertexCache[packed]);
                 }
@@ -84,7 +83,7 @@ Mesh* MeshLoader::Load(char* path)
 
                     if (vtIdx >= 0 && vtIdx < temp_uvs.size()) {
                         TexCoord tc = temp_uvs[vtIdx];
-                        tc.v = 1.0f - tc.v;
+                        tc.v = 1.0f - tc.v; // flip the texture so it isnt upside down
                         out_uvs.push_back(tc);
                     }
                     else {
@@ -106,7 +105,7 @@ Mesh* MeshLoader::Load(char* path)
     }
     file.close();
 
-    // build the final mesh
+    // stick all the data into the final mesh object
     Mesh* mesh = new Mesh();
     mesh->VertexCount = (int)out_vertices.size();
     mesh->IndexCount = (int)out_indices.size();

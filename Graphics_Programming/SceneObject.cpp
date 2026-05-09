@@ -12,8 +12,7 @@ SceneObject::SceneObject(Mesh* mesh, Texture2D* texture)
 
 SceneObject::~SceneObject()
 {
-    // Post order cleanup. visit and delete all children 
-    // before the parent is destroyed to del all remianing pointers.
+    // kill all the kids before the parent dies
     for (auto child : _children)
     {
         delete child;
@@ -23,11 +22,11 @@ SceneObject::~SceneObject()
 
 void SceneObject::Update()
 {
-    // parent logic
+    // basic spinning logic
     _rotation += 1.5f;
     if (_rotation > 360.0f) _rotation -= 360.0f;
 
-    //Update call to all children in the tree
+    // make sure everything attached to this also updates
     for (auto child : _children)
     {
         child->Update();
@@ -38,8 +37,7 @@ void SceneObject::Draw()
 {
     if (!_mesh || !_texture) return;
 
-    //  draw the parent 
-    // then move down to the children.
+    // draw the main thing
     glPushMatrix();
     glTranslatef(_position.x, _position.y, _position.z);
     glRotatef(_rotation, 0.0f, 1.0f, 0.0f);
@@ -60,8 +58,7 @@ void SceneObject::Draw()
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);
 
-    //draw all children. Because they are inside 
-    // the parent's glPushMatrix, they will move relative to the parent.
+    // draw the attached things relative to the parent
     for (auto child : _children)
     {
         child->Draw();

@@ -4,6 +4,6 @@
 class MeshLoader
 {
 public:
-    // help load the 3d files
-    static Mesh* Load(char* path);
+	// this gets the 3d models into the game
+	static Mesh* Load(char* path);
 };

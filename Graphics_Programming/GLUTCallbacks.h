@@ -4,12 +4,12 @@ class HelloGL;
 
 namespace GLUTCallbacks
 {
-    // setup the class
+    // getting the class ready
     void Init(HelloGL* gl);
 
-    // show stuff on screen
+    // put everything on the screen
     void Display();
 
-    // handle the timing 
+    // makes sure the game runs at the right speed
     void Timer(int preferredRefresh);
 }
