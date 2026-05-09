@@ -20,14 +20,14 @@ void Keyboard(unsigned char key, int x, int y) {
     float radY = rotY * (3.14159f / 180.0f);
 
     switch (key) {
-    case 27:  exit(0); break; // quit game
+    case 27:  exit(0); break;
     case 'w':
-        camX -= sin(radY) * moveSpeed;
-        camZ += cos(radY) * moveSpeed;
-        break;
-    case 's':
         camX += sin(radY) * moveSpeed;
         camZ -= cos(radY) * moveSpeed;
+        break;
+    case 's':
+        camX -= sin(radY) * moveSpeed;
+        camZ += cos(radY) * moveSpeed;
         break;
     case 'a':
         camX += cos(radY) * moveSpeed;
@@ -37,8 +37,8 @@ void Keyboard(unsigned char key, int x, int y) {
         camX -= cos(radY) * moveSpeed;
         camZ -= sin(radY) * moveSpeed;
         break;
-	case 'g': case 'G': if (currentInstance) currentInstance->TryPickupOrDrop(); break; // grab or drop
-    case 'r':  camX = 0.0f; camY = 0.0f; camZ = -20.0f; rotX = 0.0f; rotY = 0.0f; break; // reset cam
+    case 'g': case 'G': if (currentInstance) currentInstance->TryPickupOrDrop(); break;
+    case 'r':  camX = 0.0f; camY = 0.0f; camZ = -20.0f; rotX = 0.0f; rotY = 0.0f; break;
     }
 }
 
@@ -56,7 +56,7 @@ void MouseMotion(int x, int y) {
         if (rotX > 90.0f) rotX = 90.0f;
         if (rotX < -90.0f) rotX = -90.0f;
 
-        glutWarpPointer(centerX, centerY); // keep mouse in middle
+        glutWarpPointer(centerX, centerY);
     }
 }
 
@@ -73,7 +73,7 @@ HelloGL::HelloGL(int argc, char* argv[]) {
 }
 
 HelloGL::~HelloGL() {
-	DeleteList(&_root); // kill the list and all the objects in it
+    DeleteList(&_root);
     if (myTexture) delete myTexture;
     if (skyTexture) delete skyTexture;
     if (grassTexture) delete grassTexture;
@@ -83,7 +83,7 @@ void HelloGL::TryPickupOrDrop() {
     ListNode* temp = _root;
     while (temp != nullptr) {
         if (temp->object->IsHeld()) {
-			temp->object->SetIsHeld(false); // drop it if we are already holding something
+            temp->object->SetIsHeld(false);
             return;
         }
         temp = temp->next;
@@ -117,7 +117,7 @@ void HelloGL::TryPickupOrDrop() {
         }
         temp = temp->next;
     }
-    if (bestTarget) bestTarget->SetIsHeld(true); // pick up the closest thing we are looking at 
+    if (bestTarget) bestTarget->SetIsHeld(true);
 }
 
 void HelloGL::InitGL(int argc, char* argv[]) {
@@ -172,7 +172,7 @@ void HelloGL::Display() {
     gluPerspective(45.0f, (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 3000.0f);
     glMatrixMode(GL_MODELVIEW); glLoadIdentity();
 
-	// drawing the big sky box that is always around the player
+    // skybox stuff
     glPushMatrix();
     glDisable(GL_LIGHTING); glDisable(GL_DEPTH_TEST);
     glRotatef(rotX, 0.0f, 0.0f, 0.0f);
@@ -203,7 +203,7 @@ void HelloGL::Display() {
     GLfloat light_pos[] = { 0, 100, 0, 1 };
     glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
 
-    // go through the list and draw everything 
+    // render the linked list
     ListNode* temp = _root;
     while (temp != nullptr) {
         temp->object->Draw();
@@ -218,7 +218,6 @@ void HelloGL::Display() {
 }
 
 void HelloGL::Update() {
-	// go through the list and update everything and do all the game logic
     ListNode* temp = _root;
 
     while (temp != nullptr) {
@@ -247,7 +246,7 @@ void HelloGL::Update() {
                 objPos.y = floorH + radius;
             }
 
-			// check if objects are hitting each other and push them apart if they are
+            // check collisions
             ListNode* otherNode = _root;
             while (otherNode != nullptr) {
                 SceneObject* other = otherNode->object;
@@ -275,7 +274,7 @@ void HelloGL::Update() {
                 otherNode = otherNode->next;
             }
 
-			// see if we walked into a barrel and if so push it away and give points
+            // walk into a barrel
             float camDistX = objPos.x - (-camX);
             float camDistZ = objPos.z - (-camZ);
             float camDist = sqrt(camDistX * camDistX + camDistZ * camDistZ);
